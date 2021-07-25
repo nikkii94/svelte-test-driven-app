@@ -20,66 +20,90 @@
             body: JSON.stringify({
                 username, email, password
             })
-        }).finally(() => isSubmiting = true);
+        })
+            .then(result => result.json())
+            .then(response => {
+                console.log(response);
+
+                if (response.validationErrors) {
+                    for (const name in response.validationErrors) {
+                        console.log(name, response.validationErrors[name]);
+                    }
+                }
+            })
+            .finally(() => isSubmiting = true);
     }
 
 </script>
 
-<h1>Sign Up</h1>
+<div class="form-wrapper col-12">
+    <form class="card mt-5">
+        <div class="card-header">
+            <h1>Sign Up</h1>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input class="form-control" bind:value={username} name="username" type="text"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input class="form-control" bind:value={email} name="email" type="email"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input class="form-control" bind:value={password} name="password" type="password"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password repeat</label>
+                <input class="form-control" bind:value={passwordRepeat} name="password_repeat" type="password"/>
+            </div>
 
-<form>
-    <label>
-        <span>Username</span>
-        <input bind:value={username} name="username" type="text" />
-    </label>
-    <label>
-        <span>Email</span>
-        <input bind:value={email} name="email" type="email" />
-    </label>
-    <label>
-        <span>Password</span>
-        <input bind:value={password} name="password" type="password" />
-    </label>
-    <label>
-        <span>Password repeat</span>
-        <input bind:value={passwordRepeat} name="password_repeat" type="password" />
-    </label>
-
-    <button type="submit" on:click|preventDefault={submit} {disabled}>
-        {#if isSubmiting}
-            <Spinner />
-        {/if}
-        Sign up
-    </button>
-</form>
+            <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
+                {#if isSubmiting}
+                    <Spinner/>
+                {/if}
+                Sign up
+            </button>
+        </div>
+    </form>
+</div>
 
 <style>
+    .form-wrapper {
+        display: flex;
+        justify-content: center;
+    }
     h1 {
         text-align: center;
     }
-    form {
-        padding: 2rem;
+
+    .card-header {
         background: #f3f3f3;
+    }
+
+    .card-body {
+        width: 100%;
+        max-width: 50vw;
+        background: #fefefe;
         display: flex;
-        flex-direction: column;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
         flex-wrap: wrap;
     }
 
-    label {
-        display: inline-block;
+    div {
+        width: 100%;
+        /*display: inline-block;*/
     }
 
     span {
-        display: inline-block;
-        min-width: 120px;
-        max-width: 200px;
+        /*display: inline-block;*/
     }
 
     button {
         cursor: pointer;
-        background: darkcyan;
+        /*background: darkcyan;*/
         border: none;
         color: white;
         padding: .5rem 1rem;
@@ -91,6 +115,6 @@
 
     button:not(:disabled) {
         opacity: 1;
-        background: darkcyan;
+        /*background: darkcyan;*/
     }
 </style>

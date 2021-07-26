@@ -32,19 +32,5 @@
     "axios": "^0.21.1",
     "sirv-cli": "^1.0.0",
     "whatwg-fetch": "^3.6.2"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.js$": "babel-jest",
-      "^.+\\.svelte$": "svelte-jester"
-    },
-    "moduleFileExtensions": [
-      "js",
-      "svelte"
-    ],
-    "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": [
-      "@testing-library/jest-dom/extend-expect"
-    ]
   }
 }

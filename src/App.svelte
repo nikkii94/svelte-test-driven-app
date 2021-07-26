@@ -1,6 +1,6 @@
 <script>
 	import SignUp from './pages/SignUp.svelte';
-	export let name;
+	// export let name;
 </script>
 
 <!--<svelte:head>-->

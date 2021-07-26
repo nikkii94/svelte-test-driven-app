@@ -1,18 +1,22 @@
 <script>
     import Spinner from "../components/Spinner.svelte";
+    import Input from "../components/Input.svelte";
 
-    let isSubmiting = false;
+    let isSubmitting = false;
     let signUpSuccess = false;
     let disabled;
+
     let username = '';
     let email = '';
     let password = '';
     let passwordRepeat = '';
 
+    let errors = {};
+
     $: disabled = password === '' || password !== passwordRepeat;
 
     const submit = async () => {
-        isSubmiting = true;
+        isSubmitting = true;
         disabled = true;
         signUpSuccess = false;
 
@@ -30,14 +34,19 @@
             }
             return result.json();
         }).then(response => {
-
+            if (response?.validationErrors) {
+                signUpSuccess = false;
+                const { validationErrors } = response;
+                errors = validationErrors;
+            } else {
+                signUpSuccess = true;
+            }
         }).catch(err => {
             signUpSuccess = false;
         }).finally(() => {
-            isSubmiting = false;
+            isSubmitting = false;
             disabled = false;
         });
-
     };
 
 </script>
@@ -50,28 +59,46 @@
             </div>
             <div class="card-body">
                 <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input class="form-control" bind:value={username} name="username" type="text"/>
+                    <Input
+                            name="username"
+                            bind:value={username}
+                            label="Username"
+                            type="text"
+                            validationMessage={errors.username}
+                            id="username" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input class="form-control" bind:value={email} name="email" type="email"/>
+                    <Input
+                            name="email"
+                            bind:value={email}
+                            label="Email"
+                            type="email"
+                            validationMessage={errors.email}
+                            id="email" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input class="form-control" bind:value={password} name="password" type="password"/>
+                    <Input
+                            name="password"
+                            bind:value={password}
+                            label="Password"
+                            type="password"
+                            validationMessage={errors.password}
+                            id="password" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Password repeat</label>
-                    <input class="form-control" bind:value={passwordRepeat} name="password_repeat" type="password"/>
+                    <Input
+                            name="password_repeat"
+                            bind:value={passwordRepeat}
+                            label="Password repeat"
+                            type="password"
+                            validationMessage={errors.password}
+                            id="password-repeat" />
                 </div>
 
                 <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
-                    {#if isSubmiting}
+                    {#if isSubmitting}
                         <Spinner role="status"/>
-                        Sign up
-                    {:else} Sign up
-                    {/if}
+                    {/if} Sign up
                 </button>
             </div>
         </form>

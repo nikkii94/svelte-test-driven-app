@@ -2,6 +2,7 @@
     import Spinner from "../components/Spinner.svelte";
 
     let isSubmiting = false;
+    let signUpSuccess = false;
     let disabled;
     let username = '';
     let email = '';
@@ -10,8 +11,11 @@
 
     $: disabled = password === '' || password !== passwordRepeat;
 
-    const submit = () => {
+    const submit = async () => {
         isSubmiting = true;
+        disabled = true;
+        signUpSuccess = false;
+
         fetch('/api/1.0/users', {
             method: 'post',
             headers: {
@@ -20,53 +24,63 @@
             body: JSON.stringify({
                 username, email, password
             })
-        })
-            .then(result => result.json())
-            .then(response => {
-                console.log(response);
+        }).then(result => {
+            if (result.ok) {
+                signUpSuccess = true;
+            }
+            return result.json();
+        }).then(response => {
 
-                if (response.validationErrors) {
-                    for (const name in response.validationErrors) {
-                        console.log(name, response.validationErrors[name]);
-                    }
-                }
-            })
-            .finally(() => isSubmiting = true);
-    }
+        }).catch(err => {
+            signUpSuccess = false;
+        }).finally(() => {
+            isSubmiting = false;
+            disabled = false;
+        });
+
+    };
 
 </script>
 
 <div class="form-wrapper col-12">
-    <form class="card mt-5">
-        <div class="card-header">
-            <h1>Sign Up</h1>
-        </div>
-        <div class="card-body">
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                <input class="form-control" bind:value={username} name="username" type="text"/>
+    {#if !signUpSuccess}
+        <form class="card mt-5">
+            <div class="card-header">
+                <h1>Sign Up</h1>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input class="form-control" bind:value={email} name="email" type="email"/>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input class="form-control" bind:value={password} name="password" type="password"/>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Password repeat</label>
-                <input class="form-control" bind:value={passwordRepeat} name="password_repeat" type="password"/>
-            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" bind:value={username} name="username" type="text"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" bind:value={email} name="email" type="email"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input class="form-control" bind:value={password} name="password" type="password"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password repeat</label>
+                    <input class="form-control" bind:value={passwordRepeat} name="password_repeat" type="password"/>
+                </div>
 
-            <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
-                {#if isSubmiting}
-                    <Spinner/>
-                {/if}
-                Sign up
-            </button>
+                <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
+                    {#if isSubmiting}
+                        <Spinner role="status"/>
+                        Sign up
+                    {:else} Sign up
+                    {/if}
+                </button>
+            </div>
+        </form>
+    {/if}
+    {#if signUpSuccess}
+        <div class="alert alert-success" role="alert">
+            Please check your e-mail to activate your account!
         </div>
-    </form>
+    {/if}
 </div>
 
 <style>
@@ -74,8 +88,13 @@
         display: flex;
         justify-content: center;
     }
+
     h1 {
         text-align: center;
+    }
+
+    .card {
+        max-width: 600px;
     }
 
     .card-header {
@@ -84,7 +103,6 @@
 
     .card-body {
         width: 100%;
-        max-width: 50vw;
         background: #fefefe;
         display: flex;
         justify-content: center;
@@ -94,16 +112,10 @@
 
     div {
         width: 100%;
-        /*display: inline-block;*/
-    }
-
-    span {
-        /*display: inline-block;*/
     }
 
     button {
         cursor: pointer;
-        /*background: darkcyan;*/
         border: none;
         color: white;
         padding: .5rem 1rem;
@@ -115,6 +127,6 @@
 
     button:not(:disabled) {
         opacity: 1;
-        /*background: darkcyan;*/
     }
+
 </style>

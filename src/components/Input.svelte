@@ -1,12 +1,16 @@
 <script>
+    import { createEventDispatcher } from 'svelte';
     export let label = '';
     export let id = '';
     export let name = '';
     export let validationMessage = '';
     export let type = 'text';
     export let value = '';
+    // export let onChange;
 
+    const dispatch = createEventDispatcher();
     const handleInput = (e) => {
+        dispatch('myCustomInputEvent', { value });
         value = type.match(/^(number|range)$/) ? +e.target.value : e.target.value;
     };
 

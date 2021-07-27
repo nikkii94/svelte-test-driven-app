@@ -5,6 +5,7 @@
     let isSubmitting = false;
     let signUpSuccess = false;
     let disabled;
+    let passwordNotMatching;
 
     let username = '';
     let email = '';
@@ -14,6 +15,28 @@
     let errors = {};
 
     $: disabled = password === '' || password !== passwordRepeat;
+    $: passwordNotMatching = password !== passwordRepeat;
+
+    $: {
+        // this is a dirty solution
+        if (username) {
+        }
+        errors.username = '';
+    }
+
+    $: {
+        // this is a dirty solution
+        if (email) {
+        }
+        errors.email = '';
+    }
+
+    $: {
+        // this is a dirty solution
+        if (password) {
+        }
+        errors.password = '';
+    }
 
     const submit = async () => {
         isSubmitting = true;
@@ -49,6 +72,10 @@
         });
     };
 
+    const onChangeUsername = event => {
+        console.log(event.detail.value);
+    }
+
 </script>
 
 <div class="form-wrapper col-12">
@@ -64,15 +91,18 @@
                             bind:value={username}
                             label="Username"
                             type="text"
+                            on:myCustomInputEvent={onChangeUsername}
                             validationMessage={errors.username}
                             id="username" />
                 </div>
                 <div class="mb-3">
+                    <span class="d-none">Event forwarding example</span>
                     <Input
                             name="email"
                             bind:value={email}
                             label="Email"
                             type="email"
+                            on:myCustomInputEvent
                             validationMessage={errors.email}
                             id="email" />
                 </div>
@@ -91,7 +121,7 @@
                             bind:value={passwordRepeat}
                             label="Password repeat"
                             type="password"
-                            validationMessage={errors.password}
+                            validationMessage={passwordNotMatching ? 'Password mismatch' : ''}
                             id="password-repeat" />
                 </div>
 

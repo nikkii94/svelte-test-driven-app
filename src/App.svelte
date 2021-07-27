@@ -1,6 +1,11 @@
 <script>
 	import SignUp from './pages/SignUp.svelte';
 	// export let name;
+
+    const changeListener = event => {
+        console.log('App receiving');
+    }
+
 </script>
 
 <!--<svelte:head>-->
@@ -8,7 +13,7 @@
 <!--</svelte:head>-->
 
 <div class="container">
-    <SignUp />
+    <SignUp on:myCustomInputEvent={changeListener} />
 </div>
 
 <style>

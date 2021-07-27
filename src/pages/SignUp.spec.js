@@ -103,15 +103,16 @@ describe('Sign Up Page', () => {
             server.resetHandlers();
         });
 
+        let username, email, password, passwordRepeat;
         const setup = async (successful = true) => {
             const {container, getByText} = render(SignUp);
 
             button = screen.getByRole('button', { name: 'Sign up' });
 
-            const username = container.querySelector('input[name="username"]');
-            const email = container.querySelector('input[name="email"]');
-            const password = container.querySelector('input[name="password"]');
-            const passwordRepeat = container.querySelector('input[name="password_repeat"]');
+            username = container.querySelector('input[name="username"]');
+            email = container.querySelector('input[name="email"]');
+            password = container.querySelector('input[name="password"]');
+            passwordRepeat = container.querySelector('input[name="password_repeat"]');
 
             if (successful) {
                 await userEvent.type(username, 'demo');
@@ -192,8 +193,6 @@ describe('Sign Up Page', () => {
         it('displays account activation information after successful sign up request', async () => {
             await setup();
 
-            // const button = await screen.getByRole('button', { name: 'Sign up' });
-
             await userEvent.click(button);
 
             const text = await screen.findByText('Please check your e-mail to activate your account!');
@@ -210,8 +209,6 @@ describe('Sign Up Page', () => {
             );
 
             await setup(false);
-
-            // const button = await screen.getByRole('button', { name: 'Sign up' });
 
             await userEvent.click(button);
 
@@ -230,50 +227,91 @@ describe('Sign Up Page', () => {
             });
         });
 
-        it('displays validation message for username', async () => {
-            server.use(
-                rest.post(
-                    '/api/1.0/users',
-                    (request, response, context) => {
-                        return response(context.status(400), context.json({
-                            validationErrors: {
-                                username: 'Username cannot be null',
-                                email: 'Email cannot be null',
-                            }
-                        }));
-                    })
-            );
-
-            await setup();
-
-            await userEvent.click(button);
-
-            const usernameValidationError = await screen.findByText('Username cannot be null');
-            expect(usernameValidationError).toBeInTheDocument();
-        });
+        const generateValidationError = (field, message) => {
+            return rest.post(
+                '/api/1.0/users',
+                (request, response, context) => {
+                    return response(context.status(400), context.json({
+                        validationErrors: {
+                            [field]: message,
+                        }
+                    }));
+                })
+        }
 
         it('hides spinner after response receive', async () => {
             server.use(
-                rest.post(
-                    '/api/1.0/users',
-                    (request, response, context) => {
-                        return response(context.status(400), context.json({
-                            validationErrors: {
-                                username: 'Username cannot be null',
-                                email: 'Email cannot be null',
-                            }
-                        }));
-                    })
+                generateValidationError('username', 'Username cannot be null')
             );
 
-            const { container } = await setup();
-
+            await setup();
             await userEvent.click(button);
 
             await screen.findByText('Username cannot be null');
 
             const spinner = await screen.queryByRole('status');
             expect(spinner).not.toBeInTheDocument();
-        })
+        });
+
+        it.each`
+            field | message
+            ${"username"} | ${"Username cannot be null"}
+            ${"email"} | ${"Email cannot be null"}
+            ${"password"} | ${"Password cannot be null"}
+        `("display $message for $field", async ({ field, message }) => {
+            server.use(
+                generateValidationError(field, message)
+            );
+
+            await setup();
+
+            await userEvent.click(button);
+
+            const fieldValidationError = await screen.findByText(message);
+            expect(fieldValidationError).toBeInTheDocument();
+        });
+
+        it('displays mismatch message for password repeat input', async () => {
+            server.use(
+                generateValidationError('password_repeat', 'Password mismatch')
+            );
+
+            await setup();
+            await userEvent.type(password, 'demo');
+            await userEvent.type(passwordRepeat, 'asdf');
+
+            await userEvent.click(button);
+
+            const fieldValidationError = await screen.findByText('Password mismatch');
+            expect(fieldValidationError).toBeInTheDocument();
+        });
+
+        it('does not display mismatch message initially', async () => {
+            render(SignUp);
+
+            const mismatchText = screen.queryByText('Password mismatch');
+            expect(mismatchText).not.toBeInTheDocument();
+        });
+
+        it.each`
+            field | message | label
+            ${'username'} | ${'Username cannot be null'} | ${'Username'}
+            ${'email'} | ${'Email cannot be null'} | ${'Email'}
+            ${'password'} | ${'Email cannot be null'} | ${'Password'}
+        `('clears validation error after $field field is updated',
+            async ({ field, message, label}) => {
+            server.use(
+                generateValidationError(field, message)
+            );
+            await setup();
+            await userEvent.click(button);
+
+            const fieldValidationError = await screen.findByText(message);
+
+            const input = screen.getByLabelText(label);
+            await userEvent.type(input, `updated_${field}_text`);
+
+            expect(fieldValidationError).not.toBeInTheDocument();
+        });
     });
 });

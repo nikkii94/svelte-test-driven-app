@@ -7,7 +7,14 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import en from '../locale/en.json';
 import hu from '../locale/hu.json';
-import {reset} from "../locale/i18n";
+
+const server = setupServer();
+
+beforeAll(() => server.listen());
+
+afterAll(() => server.close());
+
+beforeEach(() => server.resetHandlers());
 
 describe('Sign Up Page', () => {
     describe('Layout', () => {
@@ -88,23 +95,18 @@ describe('Sign Up Page', () => {
         let button;
         let requestBody;
         let counter = 0;
-        const server = setupServer(
-            rest.post(
-                '/api/1.0/users',
-                (request, response, context) => {
-                    requestBody = request.body;
-                    counter++;
-                    return response(context.status(200));
-                })
-        );
-
-        beforeAll(() => server.listen());
-
-        afterAll(() => server.close());
 
         beforeEach(() => {
             counter = 0;
-            server.resetHandlers();
+            server.use(
+                rest.post(
+                    '/api/1.0/users',
+                    (request, response, context) => {
+                        requestBody = request.body;
+                        counter++;
+                        return response(context.status(200));
+                    })
+            );
         });
 
         let username, email, password, passwordRepeat;
@@ -120,7 +122,7 @@ describe('Sign Up Page', () => {
 
             if (successful) {
                 await userEvent.type(username, 'demo');
-                await userEvent.type(email, 'demo@localhost');
+                await userEvent.type(email, `demo@localhost`);
             }
 
             await userEvent.type(password, 'P4ssword');
@@ -146,7 +148,6 @@ describe('Sign Up Page', () => {
         it('send data to backend on button submit', async () => {
             await setup();
 
-            // const button = screen.getByRole('button', { name: 'Sign up' });
             await userEvent.click(button);
 
             await screen.findByText('Please check your e-mail to activate your account!');
@@ -335,31 +336,29 @@ describe('Sign Up Page', () => {
             passwordRepeat = screen.queryByLabelText(en.password_repeat);
         }
 
-        const server = setupServer(
-            rest.post(
-                '/api/1.0/users',
-                (request, response, context) => {
-                    const lang = request.headers.get('Accept-Language') || 'en';
-                    return response(
-                        context.status(400),
-                        context.json({
-                            validationErrors: {
-                                username: lang === 'en'
-                                    ? 'Username cannot be null'
-                                    : 'A felhasználónév nem lehet üres'
-                            }
-                        })
-                    );
-                })
-        );
+        beforeEach(() => {
+            server.use(
+                rest.post(
+                    '/api/1.0/users',
+                    (request, response, context) => {
+                        const lang = request.headers.get('Accept-Language') || 'en';
+                        return response(
+                            context.status(400),
+                            context.json({
+                                validationErrors: {
+                                    username: lang === 'en'
+                                        ? 'Username cannot be null'
+                                        : 'A felhasználónév nem lehet üres'
+                                }
+                            })
+                        );
+                    })
+            )
+        });
 
         afterEach(() => {
             document.body.innerHTML = '';
         });
-
-        beforeAll(() => server.listen());
-
-        afterAll(() => server.close());
 
         it('initially displays all texts in english', () => {
             setup();
@@ -454,6 +453,22 @@ describe('Sign Up Page', () => {
             const usernameValidationText = await screen.findByText('A felhasználónév nem lehet üres');
 
             expect(usernameValidationText).toBeInTheDocument();
+        });
+
+        it('returns validation message in english after toggling back from hungarian', async () => {
+            setup();
+
+            await toggleLang('English');
+
+            await userEvent.type(password, 'blabla');
+            await userEvent.type(passwordRepeat, 'blabla');
+
+            const button = screen.queryByRole('button', { name: en.submit});
+            await userEvent.click(button);
+
+            const usernameValidationText = await screen.findByText('Username cannot be null');
+
+            expect(usernameValidationText).toBeInTheDocument();
         })
-    })
+    });
 });

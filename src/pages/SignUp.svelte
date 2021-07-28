@@ -2,6 +2,7 @@
     import {_, locale} from 'svelte-i18n';
     import Spinner from "../components/Spinner.svelte";
     import Input from "../components/Input.svelte";
+    import {signUp} from "../api/apiCalls";
 
     let isSubmitting = false;
     let signUpSuccess = false;
@@ -25,40 +26,32 @@
         disabled = true;
         signUpSuccess = false;
 
-        fetch('/api/1.0/users', {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept-Language': localStorage.getItem('lang') || 'en'
-            },
-            body: JSON.stringify({
+        try {
+            const response = await signUp({
                 username: form.username,
                 email: form.email,
                 password: form.password,
-            })
-        }).then(result => {
-            if (result.ok) {
+            });
+
+            if (response.ok) {
                 signUpSuccess = true;
             }
-            return result.json();
-        }).then(response => {
-            if (response?.validationErrors) {
+
+            const {validationErrors} = await response.json();
+            if (validationErrors) {
                 signUpSuccess = false;
-                const { validationErrors } = response;
                 errors = validationErrors;
-            } else {
-                signUpSuccess = true;
             }
-        }).catch(err => {
+        } catch (err) {
             signUpSuccess = false;
-        }).finally(() => {
-            isSubmitting = false;
-            disabled = false;
-        });
+        }
+
+        isSubmitting = false;
+        disabled = false;
     };
 
     const onChange = event => {
-        const { name, value } = event.target;
+        const {name, value} = event.target;
         form[name] = value;
         errors[name] = '';
     }
@@ -80,7 +73,7 @@
                             on:input={onChange}
                             on:myCustomInputEvent={onChange}
                             validationMessage={errors.username}
-                            id="username" />
+                            id="username"/>
                 </div>
                 <div class="mb-3">
                     <span class="d-none">Event forwarding example</span>
@@ -91,7 +84,7 @@
                             type="email"
                             on:myCustomInputEvent
                             validationMessage={errors.email}
-                            id="email" />
+                            id="email"/>
                 </div>
                 <div class="mb-3">
                     <Input
@@ -100,7 +93,7 @@
                             label="{$_('password')}"
                             type="password"
                             validationMessage={errors.password}
-                            id="password" />
+                            id="password"/>
                 </div>
                 <div class="mb-3">
                     <Input
@@ -109,7 +102,7 @@
                             label="{$_('password_repeat')}"
                             type="password"
                             validationMessage={passwordNotMatching ? $_('password_mismatch') : ''}
-                            id="password-repeat" />
+                            id="password-repeat"/>
                 </div>
 
                 <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>

@@ -5,5 +5,7 @@
   "password": "Jelszó",
   "password_repeat": "Jelszó mégegyszer",
   "submit": "Küldés",
-  "password_mismatch": "A jelszavak nem egyeznek"
+  "password_mismatch": "A jelszavak nem egyeznek",
+  "login": "Bejelentkezés",
+  "home": "Kezdőlap"
 }

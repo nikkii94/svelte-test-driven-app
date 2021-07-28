@@ -6,13 +6,13 @@
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public --no-clear",
-    "test": "jest --watch"
+    "test": "jest --no-cache --watch"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.14.8",
-    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-commonjs": "^19.0.2",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.4",
     "@testing-library/dom": "^8.1.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/svelte": "^3.0.3",
@@ -20,13 +20,13 @@
     "babel-jest": "^27.0.6",
     "jest": "^27.0.6",
     "msw": "^0.33.0",
-    "rollup": "^2.3.4",
+    "rollup": "^2.55.0",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-dev": "^1.1.3",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
-    "svelte": "^3.0.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-svelte": "^7.1.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "svelte": "^3.41.0",
     "svelte-jester": "^1.7.0"
   },
   "dependencies": {
@@ -34,6 +34,7 @@
     "fetch-intercept": "^2.4.0",
     "sirv-cli": "^1.0.0",
     "svelte-i18n": "^3.3.9",
+    "svelte-routing": "^1.6.0",
     "whatwg-fetch": "^3.6.2"
   }
 }

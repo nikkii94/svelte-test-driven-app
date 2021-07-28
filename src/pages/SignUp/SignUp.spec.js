@@ -1,12 +1,12 @@
 import SignUp from './SignUp.svelte';
-import LanguageSelector from '../components/LanguageSelector.svelte';
+import LanguageSelector from '../../components/LanguageSelector.svelte';
 import {render, screen, waitFor} from '@testing-library/svelte';
 import userEvent from "@testing-library/user-event";
 import 'whatwg-fetch';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import en from '../locale/en.json';
-import hu from '../locale/hu.json';
+import en from '../../locale/en.json';
+import hu from '../../locale/hu.json';
 
 const server = setupServer();
 

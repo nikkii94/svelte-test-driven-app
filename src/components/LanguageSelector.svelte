@@ -15,6 +15,7 @@
 
 <style>
     img {
+        margin: 0 1rem;
         height: 40px;
         cursor: pointer;
     }

@@ -1,8 +1,8 @@
 <script>
     import {_, locale} from 'svelte-i18n';
-    import Spinner from "../components/Spinner.svelte";
-    import Input from "../components/Input.svelte";
-    import {signUp} from "../api/apiCalls";
+    import Spinner from "../../components/Spinner.svelte";
+    import Input from "../../components/Input.svelte";
+    import {signUp} from "../../api/apiCalls";
 
     let isSubmitting = false;
     let signUpSuccess = false;

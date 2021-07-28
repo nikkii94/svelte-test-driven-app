@@ -5,5 +5,7 @@
   "password": "Password",
   "password_repeat": "Password repeat",
   "submit": "Sign up",
-  "password_mismatch": "Password mismatch"
+  "password_mismatch": "Password mismatch",
+  "login": "Login",
+  "home": "Home"
 }

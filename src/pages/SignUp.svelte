@@ -1,4 +1,5 @@
 <script>
+    import {_, locale} from 'svelte-i18n';
     import Spinner from "../components/Spinner.svelte";
     import Input from "../components/Input.svelte";
 
@@ -7,36 +8,17 @@
     let disabled;
     let passwordNotMatching;
 
-    let username = '';
-    let email = '';
-    let password = '';
-    let passwordRepeat = '';
+    let form = {
+        username: '',
+        email: '',
+        password: '',
+        password_repeat: '',
+    }
 
     let errors = {};
 
-    $: disabled = password === '' || password !== passwordRepeat;
-    $: passwordNotMatching = password !== passwordRepeat;
-
-    $: {
-        // this is a dirty solution
-        if (username) {
-        }
-        errors.username = '';
-    }
-
-    $: {
-        // this is a dirty solution
-        if (email) {
-        }
-        errors.email = '';
-    }
-
-    $: {
-        // this is a dirty solution
-        if (password) {
-        }
-        errors.password = '';
-    }
+    $: disabled = form.password === '' || form.password !== form.password_repeat;
+    $: passwordNotMatching = form.password !== form.password_repeat;
 
     const submit = async () => {
         isSubmitting = true;
@@ -46,10 +28,13 @@
         fetch('/api/1.0/users', {
             method: 'post',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept-Language': localStorage.getItem('lang') || 'en'
             },
             body: JSON.stringify({
-                username, email, password
+                username: form.username,
+                email: form.email,
+                password: form.password,
             })
         }).then(result => {
             if (result.ok) {
@@ -72,8 +57,10 @@
         });
     };
 
-    const onChangeUsername = event => {
-        console.log(event.detail.value);
+    const onChange = event => {
+        const { name, value } = event.target;
+        form[name] = value;
+        errors[name] = '';
     }
 
 </script>
@@ -82,16 +69,16 @@
     {#if !signUpSuccess}
         <form class="card mt-5">
             <div class="card-header">
-                <h1>Sign Up</h1>
+                <h1>{$_('signUp')}</h1>
             </div>
             <div class="card-body">
                 <div class="mb-3">
                     <Input
                             name="username"
-                            bind:value={username}
-                            label="Username"
+                            label="{$_('username')}"
                             type="text"
-                            on:myCustomInputEvent={onChangeUsername}
+                            on:input={onChange}
+                            on:myCustomInputEvent={onChange}
                             validationMessage={errors.username}
                             id="username" />
                 </div>
@@ -99,8 +86,8 @@
                     <span class="d-none">Event forwarding example</span>
                     <Input
                             name="email"
-                            bind:value={email}
-                            label="Email"
+                            on:input={onChange}
+                            label="{$_('email')}"
                             type="email"
                             on:myCustomInputEvent
                             validationMessage={errors.email}
@@ -109,8 +96,8 @@
                 <div class="mb-3">
                     <Input
                             name="password"
-                            bind:value={password}
-                            label="Password"
+                            on:input={onChange}
+                            label="{$_('password')}"
                             type="password"
                             validationMessage={errors.password}
                             id="password" />
@@ -118,17 +105,17 @@
                 <div class="mb-3">
                     <Input
                             name="password_repeat"
-                            bind:value={passwordRepeat}
-                            label="Password repeat"
+                            on:input={onChange}
+                            label="{$_('password_repeat')}"
                             type="password"
-                            validationMessage={passwordNotMatching ? 'Password mismatch' : ''}
+                            validationMessage={passwordNotMatching ? $_('password_mismatch') : ''}
                             id="password-repeat" />
                 </div>
 
                 <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
                     {#if isSubmitting}
                         <Spinner role="status"/>
-                    {/if} Sign up
+                    {/if} {$_('submit')}
                 </button>
             </div>
         </form>
@@ -139,6 +126,7 @@
         </div>
     {/if}
 </div>
+
 
 <style>
     .form-wrapper {

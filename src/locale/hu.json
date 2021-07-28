@@ -1,0 +1,9 @@
+{
+  "signUp": "Regisztráció",
+  "username": "Felhasználónév",
+  "email": "Email",
+  "password": "Jelszó",
+  "password_repeat": "Jelszó mégegyszer",
+  "submit": "Küldés",
+  "password_mismatch": "A jelszavak nem egyeznek"
+}

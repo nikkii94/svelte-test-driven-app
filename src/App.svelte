@@ -1,5 +1,6 @@
 <script>
 	import SignUp from './pages/SignUp.svelte';
+	import LanguageSelector from './components/LanguageSelector.svelte';
 	// export let name;
 
     const changeListener = event => {
@@ -14,6 +15,7 @@
 
 <div class="container">
     <SignUp on:myCustomInputEvent={changeListener} />
+    <LanguageSelector />
 </div>
 
 <style>

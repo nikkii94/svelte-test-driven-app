@@ -1,9 +1,13 @@
 import SignUp from './SignUp.svelte';
+import LanguageSelector from '../components/LanguageSelector.svelte';
 import {render, screen, waitFor} from '@testing-library/svelte';
 import userEvent from "@testing-library/user-event";
 import 'whatwg-fetch';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import en from '../locale/en.json';
+import hu from '../locale/hu.json';
+import {reset} from "../locale/i18n";
 
 describe('Sign Up Page', () => {
     describe('Layout', () => {
@@ -273,7 +277,7 @@ describe('Sign Up Page', () => {
 
         it('displays mismatch message for password repeat input', async () => {
             server.use(
-                generateValidationError('password_repeat', 'Password mismatch')
+                generateValidationError('password_repeat', hu.password_mismatch)
             );
 
             await setup();
@@ -282,14 +286,14 @@ describe('Sign Up Page', () => {
 
             await userEvent.click(button);
 
-            const fieldValidationError = await screen.findByText('Password mismatch');
+            const fieldValidationError = await screen.findByText(en.password_mismatch);
             expect(fieldValidationError).toBeInTheDocument();
         });
 
         it('does not display mismatch message initially', async () => {
             render(SignUp);
 
-            const mismatchText = screen.queryByText('Password mismatch');
+            const mismatchText = screen.queryByText(hu.password_mismatch);
             expect(mismatchText).not.toBeInTheDocument();
         });
 
@@ -314,4 +318,142 @@ describe('Sign Up Page', () => {
             expect(fieldValidationError).not.toBeInTheDocument();
         });
     });
+
+    describe('Internatialization', () => {
+        const toggleLang = async (lang) => {
+            const toggle = screen.getByTitle(lang);
+            await userEvent.click(toggle);
+        }
+
+        let password, passwordRepeat;
+
+        const setup = () => {
+            render(SignUp);
+            const { debug } = render(LanguageSelector);
+
+            password = screen.queryByLabelText(en.password);
+            passwordRepeat = screen.queryByLabelText(en.password_repeat);
+        }
+
+        const server = setupServer(
+            rest.post(
+                '/api/1.0/users',
+                (request, response, context) => {
+                    const lang = request.headers.get('Accept-Language') || 'en';
+                    return response(
+                        context.status(400),
+                        context.json({
+                            validationErrors: {
+                                username: lang === 'en'
+                                    ? 'Username cannot be null'
+                                    : 'A felhasználónév nem lehet üres'
+                            }
+                        })
+                    );
+                })
+        );
+
+        afterEach(() => {
+            document.body.innerHTML = '';
+        });
+
+        beforeAll(() => server.listen());
+
+        afterAll(() => server.close());
+
+        it('initially displays all texts in english', () => {
+            setup();
+            expect(
+                screen.queryByRole('heading', { name: en.signUp})
+            ).toBeInTheDocument();
+
+            expect(
+                screen.queryByRole('button', { name: en.submit})
+            ).toBeInTheDocument();
+
+            expect(screen.queryByLabelText(en.username)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.email)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.password)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.password_repeat)).toBeInTheDocument();
+        });
+
+        it('initially displays all texts in hungarian after toggling the language', async () => {
+            setup();
+            await toggleLang('Magyar');
+
+            expect(
+                screen.queryByRole('heading', { name: hu.signUp})
+            ).toBeInTheDocument();
+
+            expect(
+                screen.queryByRole('button', { name: hu.submit})
+            ).toBeInTheDocument();
+
+            expect(screen.queryByLabelText(hu.username)).toBeInTheDocument();
+            expect(screen.queryByLabelText(hu.email)).toBeInTheDocument();
+            expect(screen.queryByLabelText(hu.password)).toBeInTheDocument();
+            expect(screen.queryByLabelText(hu.password_repeat)).toBeInTheDocument();
+        });
+
+        it('initially displays all texts in english after toggling back the language', async () => {
+            setup();
+            await toggleLang('Magyar');
+            await toggleLang('English');
+
+            expect(
+                screen.queryByRole('heading', { name: en.signUp})
+            ).toBeInTheDocument();
+
+            expect(
+                screen.queryByRole('button', { name: en.submit})
+            ).toBeInTheDocument();
+
+            expect(screen.queryByLabelText(en.username)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.email)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.password)).toBeInTheDocument();
+            expect(screen.queryByLabelText(en.password_repeat)).toBeInTheDocument();
+        });
+
+        it('displays password mismatch validation in hungarian', async () => {
+            setup();
+            await toggleLang('Magyar');
+
+            const password = await screen.queryByLabelText(hu.password);
+            await userEvent.type(password, 'blabla');
+
+            const mismatchText = screen.queryByText(hu.password_mismatch);
+
+            expect(mismatchText).toBeInTheDocument();
+        });
+
+        it('returns validation message in english initially', async () => {
+            setup();
+
+            await userEvent.type(password, 'blabla');
+            await userEvent.type(passwordRepeat, 'blabla');
+
+            const button = screen.queryByRole('button', { name: en.submit});
+            await userEvent.click(button);
+
+            const usernameValidationText = await screen.findByText('Username cannot be null');
+
+            expect(usernameValidationText).toBeInTheDocument();
+        });
+
+        it('returns validation message in hungarian after language is selected', async () => {
+            setup();
+
+            await toggleLang('Magyar');
+
+            await userEvent.type(password, 'blabla');
+            await userEvent.type(passwordRepeat, 'blabla');
+
+            const button = screen.queryByRole('button', { name: hu.submit});
+            await userEvent.click(button);
+
+            const usernameValidationText = await screen.findByText('A felhasználónév nem lehet üres');
+
+            expect(usernameValidationText).toBeInTheDocument();
+        })
+    })
 });

@@ -3,24 +3,7 @@
     import Spinner from "../../components/Spinner.svelte";
 
     export let token;
-    let success = false;
-    let fail = false;
-
-    const sendActivationRequest = async () => {
-        try {
-            const response = await activate(token);
-            success = response.ok;
-
-            if (!success) {
-                // const {message} = await response.json();
-                fail = true;
-            }
-        } catch (err) {
-            success = false;
-            fail = true;
-        }
-    };
-    let inProgress = sendActivationRequest();
+    let inProgress = activate(token);
 
 </script>
 
@@ -29,12 +12,13 @@
         <div class="spinner-wrapper">
             <Spinner width="3rem" height="3rem" color="#f3f3f3" role="status" />
         </div>
+    {:then response}
+        {#if response.ok}
+            <div class="alert alert-success text-center">Account has been activated!</div>
+        {:else}
+            <div class="alert alert-danger text-center">Activation failure!</div>
+        {/if}
     {/await}
-    {#if success}
-        <div class="alert alert-success text-center">Account has been activated!</div>
-    {:else if fail}
-        <div class="alert alert-danger text-center">Activation failure!</div>
-    {/if}
 </div>
 
 <style>

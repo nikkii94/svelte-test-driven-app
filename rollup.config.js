@@ -69,6 +69,7 @@ export default {
 			dirs: ['public'],
 			host: 'localhost',
 			port: 9876,
+			spa: 'public/index.html',
 			proxy: {
 				'/api/*': 'localhost:8080'
 			}

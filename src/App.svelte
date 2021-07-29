@@ -4,9 +4,11 @@
     import {_} from 'svelte-i18n';
     import HomePage from "./pages/Home/HomePage.svelte";
     import SignUp from "./pages/SignUp/SignUp.svelte";
+    import Login from "./pages/Login/Login.svelte";
+    import UserPage from "./pages/User/UserPage.svelte";
     // export let name;
 
-    export let url = '';
+    export let url = window.location.pathname;
 
     const changeListener = event => {
         console.log('App receiving');
@@ -30,15 +32,15 @@
             </div>
 
             <ul class="nav nav-pills">
-                    <li class="nav-item">
-                        <Link to="/" class="nav-link active" aria-current="page">{$_('home')}</Link>
-                    </li>
-                    <li class="nav-item">
-                        <Link to="/login" class="nav-link">{$_('login')}</Link>
-                    </li>
-                    <li class="nav-item">
-                        <Link to="/signup" class="nav-link">{$_('signUp')}</Link>
-                    </li>
+                <li class="nav-item">
+                    <Link to="/" class="nav-link active" aria-current="page">{$_('home')}</Link>
+                </li>
+                <li class="nav-item">
+                    <Link to="/login" class="nav-link">{$_('login')}</Link>
+                </li>
+                <li class="nav-item">
+                    <Link to="/signup" class="nav-link">{$_('signUp')}</Link>
+                </li>
                 </ul>
         </header>
 
@@ -50,7 +52,10 @@
                 <SignUp on:myCustomInputEvent={changeListener} />
             </Route>
             <Route path="/login">
-<!--                <Login />-->
+                <Login />
+            </Route>
+            <Route path="/user/:id" let:params>
+                <UserPage id={params.id} />
             </Route>
         </div>
 

@@ -58,7 +58,7 @@
 
 </script>
 
-<div class="form-wrapper col-12">
+<div class="form-wrapper col-12" data-testid="signup-page">
     {#if !signUpSuccess}
         <form class="card mt-5">
             <div class="card-header">

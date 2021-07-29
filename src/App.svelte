@@ -6,6 +6,7 @@
     import SignUp from "./pages/SignUp/SignUp.svelte";
     import Login from "./pages/Login/Login.svelte";
     import UserPage from "./pages/User/UserPage.svelte";
+    import AccountActivation from "./pages/AccountActivation/AccountActivation.svelte";
     // export let name;
 
     export let url = window.location.pathname;
@@ -56,6 +57,9 @@
             </Route>
             <Route path="/user/:id" let:params>
                 <UserPage id={params.id} />
+            </Route>
+            <Route path="/activate/:token" let:params>
+                <AccountActivation token={params.token}/>
             </Route>
         </div>
 

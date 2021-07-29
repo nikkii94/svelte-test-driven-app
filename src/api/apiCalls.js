@@ -1,8 +1,13 @@
 import {locale} from "svelte-i18n";
+import 'whatwg-fetch';
 
 locale.subscribe((lang) => {
     localStorage.setItem('lang', lang);
 });
+
+const headers = {
+    'Content-Type': 'application/json'
+};
 
 export const signUp = async (body) => {
     return await fetch('/api/1.0/users', {
@@ -12,5 +17,11 @@ export const signUp = async (body) => {
             'Accept-Language': localStorage.getItem('lang') || 'en'
         },
         body: JSON.stringify(body)
+    });
+}
+
+export const activate = async (token) => {
+    return await fetch('/api/1.0/users/token/' + token, {
+        method: 'post',
     });
 }

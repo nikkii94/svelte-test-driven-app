@@ -1,5 +1,5 @@
 <script>
-    console.log($$props);
+    // console.log($$props);
     export let id;
 </script>
 

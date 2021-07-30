@@ -7,6 +7,7 @@
     import Login from "./pages/Login/Login.svelte";
     import UserPage from "./pages/User/UserPage.svelte";
     import AccountActivation from "./pages/AccountActivation/AccountActivation.svelte";
+    import UserListPage from "./pages/User/UserListPage.svelte";
     // export let name;
 
     export let url = window.location.pathname;
@@ -54,6 +55,9 @@
             </Route>
             <Route path="/login">
                 <Login />
+            </Route>
+            <Route path="/users">
+                <UserListPage />
             </Route>
             <Route path="/user/:id" let:params>
                 <UserPage id={params.id} />

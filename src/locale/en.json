@@ -7,5 +7,8 @@
   "submit": "Sign up",
   "password_mismatch": "Password mismatch",
   "login": "Login",
-  "home": "Home"
+  "home": "Home",
+  "users": "Users",
+  "nextPage": "Next",
+  "previousPage": "Previous"
 }

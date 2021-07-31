@@ -3,13 +3,46 @@ import userEvent from '@testing-library/user-event';
 import App from './App.svelte';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import UserList from "./components/UserList.svelte";
 
 const server = setupServer(
     rest.post(
         '/api/1.0/users/token/:token',
         (request, response, context) => {
             return response(context.status(200));
-        })
+        }),
+    rest.get("/api/1.0/users", (req, res, ctx) => {
+        return res(
+            ctx.status(200),
+            ctx.json({
+                content: [
+                    {
+                        id: 1,
+                        username: "user-in-list",
+                        email: "user-in-list@mail.com",
+                        image: null,
+                    },
+                ],
+                page: 0,
+                size: 0,
+                totalPages: 0,
+            })
+        );
+    }),
+    rest.get("/api/1.0/users/:id", (req, res, ctx) => {
+        return res(
+            ctx.status(200),
+            ctx.json({
+                id: 1,
+                username: "user1",
+                email: "user1@mail.com",
+                image: null,
+            })
+        );
+    }),
+    rest.post("/api/1.0/auth", (req, res, ctx) => {
+        return res(ctx.status(200), ctx.json({ id: 5, username: "user5" }));
+    })
 );
 
 beforeAll(() => server.listen());
@@ -80,6 +113,14 @@ describe('Routing', () => {
 
         expect(screen.queryByTestId(visible)).toBeInTheDocument();
         expect(window.location.pathname).toBe(lastUrl)
+    });
+
+    it('navigates to user page when clicking the username on user list', async () => {
+        setup('/users');
+        const firstUser = await screen.findByText('user-in-list');
+        await userEvent.click(firstUser); 
+
+        expect(screen.queryByTestId('user-page')).toBeInTheDocument();
     })
 
 });

@@ -1,5 +1,6 @@
 import {locale} from "svelte-i18n";
 import 'whatwg-fetch';
+import {fetch} from "whatwg-fetch";
 
 locale.subscribe((lang) => {
     localStorage.setItem('lang', lang);
@@ -28,4 +29,8 @@ export const activate = async (token) => {
 
 export const getUsers = async (page = 0) => {
     return await fetch(`/api/1.0/users?page=${page}`);
+}
+
+export const getUser = async (id) => {
+    return await fetch(`/api/1.0/users/${id}`);
 }

@@ -1,9 +1,12 @@
 import {render, screen, waitFor} from "@testing-library/svelte";
 import UserList from './UserList.svelte';
+import LanguageSelector from './LanguageSelector.svelte';
 import {setupServer} from 'msw/node';
 import {rest} from 'msw';
 import 'whatwg-fetch';
 import userEvent from "@testing-library/user-event";
+import en from '../locale/en.json';
+import hu from '../locale/hu.json';
 
 const server = setupServer();
 
@@ -120,7 +123,7 @@ describe('Users page', () => {
         render(UserList);
         const nextLink = await screen.findByText('Next');
         await userEvent.click(nextLink);
-        expect(await screen.findByText(`user${defaultSize+1}`)).toBeInTheDocument();
+        expect(await screen.findByText(`user${defaultSize + 1}`)).toBeInTheDocument();
     });
 
     it('disables next button if there is no next page', async () => {
@@ -128,13 +131,13 @@ describe('Users page', () => {
         const nextLink = await screen.findByText('Next');
 
         await userEvent.click(nextLink);
-        await screen.findByText(`user${defaultSize+1}`);
+        await screen.findByText(`user${defaultSize + 1}`);
 
         await userEvent.click(nextLink);
-        await screen.findByText(`user${defaultSize * 2 +1}`);
+        await screen.findByText(`user${defaultSize * 2 + 1}`);
 
         await userEvent.click(nextLink);
-        await screen.findByText(`user${defaultSize * 3 +1}`);
+        await screen.findByText(`user${defaultSize * 3 + 1}`);
 
         expect(nextLink.parentElement.classList).toContain('disabled');
     });
@@ -160,7 +163,7 @@ describe('Users page', () => {
         const nextLink = await screen.findByText('Next');
         await userEvent.click(nextLink);
 
-        await screen.findByText(`user${defaultSize+1}`);
+        await screen.findByText(`user${defaultSize + 1}`);
 
         const previousLink = await screen.findByText('Previous');
         expect(previousLink.parentElement.classList).not.toContain('disabled');
@@ -171,11 +174,73 @@ describe('Users page', () => {
         const nextLink = await screen.findByText('Next');
         await userEvent.click(nextLink);
 
-        await screen.findByText(`user${defaultSize+1}`);
+        await screen.findByText(`user${defaultSize + 1}`);
 
         const previousLink = await screen.findByText('Previous');
         await userEvent.click(previousLink);
 
         expect(await screen.findByText(`user1`)).toBeInTheDocument();
-    })
+    });
+
+    it('displays spinner while the api call is in progress', async () => {
+        render(UserList);
+        const spinner = screen.queryByRole('status');
+        await screen.findByText('user1');
+        expect(spinner).not.toBeInTheDocument();
+    });
 });
+
+describe('Internationalization', () => {
+    let users, previous, next;
+    const setup = async () => {
+        render(UserList);
+        render(LanguageSelector);
+
+        await screen.findByText('user4');
+
+        users = screen.queryByText(en.users);
+        previous = screen.queryByText(en.previousPage);
+        next = screen.queryByText(en.nextPage);
+    }
+
+    const toggleLang = async (lang) => {
+        const toggle = screen.getByTitle(lang);
+        await userEvent.click(toggle);
+    }
+
+    beforeEach(() => {
+        server.use(
+            rest.get('/api/1.0/users', (request, response, context) => {
+                return response(
+                    context.status(200),
+                    context.json(getPage(1, 3))
+                );
+            })
+        );
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = '';
+    });
+
+    it('initially displays header and navigation links in english', async () => {
+        await setup();
+
+        expect(users).toBeInTheDocument();
+        expect(previous).toBeInTheDocument();
+        expect(next).toBeInTheDocument();
+    });
+
+    it('initially displays all texts in hungarian after toggling the language', async () => {
+        await setup();
+        await toggleLang('Magyar');
+
+        users = screen.queryByText(hu.users);
+        previous = screen.queryByText(hu.previousPage);
+        next = screen.queryByText(hu.nextPage);
+
+        expect(users).toBeInTheDocument();
+        expect(previous).toBeInTheDocument();
+        expect(next).toBeInTheDocument();
+    })
+})

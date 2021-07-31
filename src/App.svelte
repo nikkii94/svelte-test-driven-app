@@ -43,7 +43,7 @@
                 <li class="nav-item">
                     <Link to="/signup" class="nav-link">{$_('signUp')}</Link>
                 </li>
-                </ul>
+            </ul>
         </header>
 
         <div class="container">

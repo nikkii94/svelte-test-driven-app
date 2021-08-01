@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event';
 import App from './App.svelte';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
-import UserList from "./components/UserList.svelte";
 import Login from "./pages/Login/Login.svelte";
 
 const server = setupServer(
@@ -106,7 +105,7 @@ describe('Routing', () => {
     it.each`
         initialPath | clicking | visible | lastUrl
         ${"/"} | ${"Sign Up"} |${"signup-page"} | ${"/signup"}
-        ${"/signup"} | ${"Home"} |${"home-page"} | ${"/"}
+        ${"/signup"} | ${"Svelte Demo App"} |${"home-page"} | ${"/"}
     `('displays $visible after clicking clicking link', async ({ clicking, visible, lastUrl }) => {
         setup('/');
         const link = screen.queryByRole('link', { name:clicking });
@@ -125,29 +124,80 @@ describe('Routing', () => {
     });
 
     describe('Login', () => {
+        let emailInput, passwordInput, loginButton;
 
-        server.use(
-            rest.post('/api/1.0/auth', (request, response, context) => {
-                return response(
-                    context.status(200),
-                    context.json({ username: 'user5' })
-                );
-            })
-        );
-
-        it('redirects to homepage after successful login', async () => {
+        const fillLoginForm = async () => {
             setup('/login');
-            const emailInput = screen.getByLabelText('Email');
-            const passwordInput = screen.getByLabelText('Password');
-            const loginButton = screen.getByRole('button', { name: 'Login' });
+            emailInput = screen.getByLabelText('Email');
+            passwordInput = screen.getByLabelText('Password');
+            loginButton = screen.getByRole('button', { name: 'Login' });
 
-            await userEvent.type(emailInput, 'user5@gmail.com');
+            await userEvent.type(emailInput, 'user5@mail.com');
             await userEvent.type(passwordInput, 'P4ssword');
             await userEvent.click(loginButton);
+        };
+
+        afterEach(() => {
+            localStorage.clear();
+        })
+
+        it('redirects to homepage after successful login', async () => {
+           await fillLoginForm();
 
             const homepage = await screen.findByTestId('home-page');
             expect(homepage).toBeInTheDocument();
         });
-    })
+
+        it('hides login and signup form navbar after successful login', async () => {
+            await fillLoginForm();
+
+            const loginLink = screen.queryByRole('link', { name: 'Login'});
+            const signUpLink = screen.queryByRole('link', { name: 'Sign Up'});
+
+            await screen.findByTestId('home-page');
+
+            expect(loginLink).not.toBeInTheDocument();
+            expect(signUpLink).not.toBeInTheDocument();
+        });
+
+        it('displays profile link on navbar after successful login', async () => {
+            await fillLoginForm();
+            await screen.findByTestId('home-page');
+            const profileLink = screen.queryByRole('link', { name: 'Profile'});
+
+            expect(profileLink).toBeInTheDocument();
+        });
+
+        it('displays user page with logged in user id in url after clicking profile link', async () => {
+            await fillLoginForm();
+            await screen.findByTestId('home-page');
+
+            const profileLink = screen.queryByRole('link', { name: 'Profile'});
+            await userEvent.click(profileLink);
+            const userPage = await screen.findByTestId('user-page');
+            expect(userPage).toBeInTheDocument();
+
+            expect(window.location.pathname.endsWith('/user/5')).toBeTruthy();
+        });
+
+        it('stores logged in state in locale storage', async () => {
+            await fillLoginForm();
+            await screen.findByTestId('home-page');
+
+            const state = JSON.parse(localStorage.getItem('auth'));
+            expect(state.isLoggedIn).toBeTruthy();
+        });
+
+        it('displays layout of logged in state when local storage has logged in user', async () => {
+            localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true, id: 5 }));
+            await setup('/');
+
+            await screen.findByTestId('home-page');
+            const profileLink = screen.queryByRole('link', { name: 'Profile'});
+
+            expect(profileLink).toBeInTheDocument();
+        })
+
+    });
 
 });

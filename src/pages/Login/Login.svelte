@@ -5,6 +5,7 @@
     import {navigate} from 'svelte-routing';
     import ButtonWithProgress from "../../components/ButtonWithProgress.svelte";
     import Card from "../../components/Card.svelte";
+    import { auth } from '../../store/stores';
 
     let isSubmitting = false;
     let loginSuccess = false;
@@ -27,6 +28,8 @@
 
             if (response.ok) {
                 loginSuccess = true;
+                const user = await response.json();
+                auth.set({ isLoggedIn: true, id: user.id });
                 navigate('/');
             } else {
                 const {message} = await response.json();

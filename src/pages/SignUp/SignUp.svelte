@@ -1,8 +1,9 @@
 <script>
-    import {_, locale} from 'svelte-i18n';
-    import Spinner from "../../components/Spinner.svelte";
+    import {_} from 'svelte-i18n';
     import Input from "../../components/Input.svelte";
     import {signUp} from "../../api/apiCalls";
+    import ButtonWithProgress from "../../components/ButtonWithProgress.svelte";
+    import Card from "../../components/Card.svelte";
 
     let isSubmitting = false;
     let signUpSuccess = false;
@@ -58,59 +59,61 @@
 
 </script>
 
-<div class="form-wrapper col-12" data-testid="signup-page">
+<div class="row" data-testid="signup-page">
     {#if !signUpSuccess}
-        <form class="card mt-5">
-            <div class="card-header">
-                <h1>{$_('signUp')}</h1>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <Input
-                            name="username"
-                            label="{$_('username')}"
-                            type="text"
-                            on:input={onChange}
-                            on:myCustomInputEvent={onChange}
-                            validationMessage={errors.username}
-                            id="username"/>
-                </div>
-                <div class="mb-3">
-                    <span class="d-none">Event forwarding example</span>
-                    <Input
-                            name="email"
-                            on:input={onChange}
-                            label="{$_('email')}"
-                            type="email"
-                            on:myCustomInputEvent
-                            validationMessage={errors.email}
-                            id="email"/>
-                </div>
-                <div class="mb-3">
-                    <Input
-                            name="password"
-                            on:input={onChange}
-                            label="{$_('password')}"
-                            type="password"
-                            validationMessage={errors.password}
-                            id="password"/>
-                </div>
-                <div class="mb-3">
-                    <Input
-                            name="password_repeat"
-                            on:input={onChange}
-                            label="{$_('password_repeat')}"
-                            type="password"
-                            validationMessage={passwordNotMatching ? $_('password_mismatch') : ''}
-                            id="password-repeat"/>
-                </div>
+        <form class="col d-flex justify-content-center">
+            <Card>
+                <h1 class="text-center" slot="header">{$_('signUp')}</h1>
 
-                <button class="btn btn-primary" type="submit" on:click|preventDefault={submit} {disabled}>
-                    {#if isSubmitting}
-                        <Spinner role="status"/>
-                    {/if} {$_('submit')}
-                </button>
-            </div>
+                <div slot="body">
+                    <div class="mb-3">
+                        <Input
+                                name="username"
+                                label="{$_('username')}"
+                                type="text"
+                                on:input={onChange}
+                                on:myCustomInputEvent={onChange}
+                                validationMessage={errors.username}
+                                id="username"/>
+                    </div>
+                    <div class="mb-3">
+                        <span class="d-none">Event forwarding example</span>
+                        <Input
+                                name="email"
+                                on:input={onChange}
+                                label="{$_('email')}"
+                                type="email"
+                                on:myCustomInputEvent
+                                validationMessage={errors.email}
+                                id="email"/>
+                    </div>
+                    <div class="mb-3">
+                        <Input
+                                name="password"
+                                on:input={onChange}
+                                label="{$_('password')}"
+                                type="password"
+                                validationMessage={errors.password}
+                                id="password"/>
+                    </div>
+                    <div class="mb-3">
+                        <Input
+                                name="password_repeat"
+                                on:input={onChange}
+                                label="{$_('password_repeat')}"
+                                type="password"
+                                validationMessage={passwordNotMatching ? $_('password_mismatch') : ''}
+                                id="password-repeat"/>
+                    </div>
+
+                    <ButtonWithProgress
+                            onClick={submit}
+                            {disabled}
+                            inProgress={isSubmitting}>
+                        {$_('submit')}
+                    </ButtonWithProgress>
+                </div>
+            </Card>
         </form>
     {/if}
     {#if signUpSuccess}
@@ -122,49 +125,7 @@
 
 
 <style>
-    .form-wrapper {
-        display: flex;
-        justify-content: center;
-    }
-
-    h1 {
-        text-align: center;
-    }
-
-    .card {
-        max-width: 600px;
-    }
-
-    .card-header {
-        background: #f3f3f3;
-    }
-
-    .card-body {
-        width: 100%;
-        background: #fefefe;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
     div {
         width: 100%;
     }
-
-    button {
-        cursor: pointer;
-        border: none;
-        color: white;
-        padding: .5rem 1rem;
-    }
-
-    button:disabled {
-        opacity: .65;
-    }
-
-    button:not(:disabled) {
-        opacity: 1;
-    }
-
 </style>

@@ -21,6 +21,17 @@ export const signUp = async (body) => {
     });
 }
 
+export const login = async (body) => {
+    return await fetch('/api/1.0/auth', {
+        method: 'post',
+        headers: {
+            ...headers,
+            'Accept-Language': localStorage.getItem('lang') || 'en'
+        },
+        body: JSON.stringify(body)
+    });
+}
+
 export const activate = async (token) => {
     return await fetch('/api/1.0/users/token/' + token, {
         method: 'post',

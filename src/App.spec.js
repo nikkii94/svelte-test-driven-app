@@ -4,6 +4,7 @@ import App from './App.svelte';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import UserList from "./components/UserList.svelte";
+import Login from "./pages/Login/Login.svelte";
 
 const server = setupServer(
     rest.post(
@@ -118,9 +119,35 @@ describe('Routing', () => {
     it('navigates to user page when clicking the username on user list', async () => {
         setup('/users');
         const firstUser = await screen.findByText('user-in-list');
-        await userEvent.click(firstUser); 
+        await userEvent.click(firstUser);
 
         expect(screen.queryByTestId('user-page')).toBeInTheDocument();
+    });
+
+    describe('Login', () => {
+
+        server.use(
+            rest.post('/api/1.0/auth', (request, response, context) => {
+                return response(
+                    context.status(200),
+                    context.json({ username: 'user5' })
+                );
+            })
+        );
+
+        it('redirects to homepage after successful login', async () => {
+            setup('/login');
+            const emailInput = screen.getByLabelText('Email');
+            const passwordInput = screen.getByLabelText('Password');
+            const loginButton = screen.getByRole('button', { name: 'Login' });
+
+            await userEvent.type(emailInput, 'user5@gmail.com');
+            await userEvent.type(passwordInput, 'P4ssword');
+            await userEvent.click(loginButton);
+
+            const homepage = await screen.findByTestId('home-page');
+            expect(homepage).toBeInTheDocument();
+        });
     })
 
 });

@@ -320,7 +320,7 @@ describe('Sign Up Page', () => {
         });
     });
 
-    describe('Internatialization', () => {
+    describe('Internationalization', () => {
         const toggleLang = async (lang) => {
             const toggle = screen.getByTitle(lang);
             await userEvent.click(toggle);

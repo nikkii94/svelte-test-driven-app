@@ -31,13 +31,6 @@
         let apiCall = await getUsers(currentPage);
         page = await apiCall.json();
         pendingApiCall = false;
-
-        if (!currentPage) {
-            try {
-                page.content[1].image = '/images/dog.jpg';
-            } catch (err) {
-            }
-        }
     };
     users();
 </script>

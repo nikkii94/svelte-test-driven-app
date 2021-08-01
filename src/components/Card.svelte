@@ -1,5 +1,3 @@
-<script></script>
-
 <div class="card">
     {#if $$slots.header}
         <div class="card-header">

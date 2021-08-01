@@ -7,6 +7,7 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import en from '../../locale/en.json';
 import hu from '../../locale/hu.json';
+import storage from "../../store/storage";
 
 const server = setupServer();
 
@@ -20,6 +21,18 @@ const failingUser = {
     email: 'user100@failing.com',
     password: 'aA123456'
 };
+
+const loginSuccess = rest.post("/api/1.0/auth", (req, res, ctx) => {
+    return res(
+        ctx.status(200),
+        ctx.json({
+            id: 5,
+            username: "user5",
+            image: null,
+            token: "abcdefgh",
+        })
+    );
+});
 
 describe('Login page', () => {
     it('has login header', () => {
@@ -161,7 +174,33 @@ describe('Login page', () => {
             expect(error).not.toBeInTheDocument();
         })
 
+        it("stores id, username and image in storage", async () => {
+            server.use(loginSuccess);
+            setup();
+            await fillAndSubmit();
 
+            const spinner = screen.queryByRole("status");
+            await waitForElementToBeRemoved(spinner);
+
+            const storedState = storage.getItem("auth");
+            const keyList = Object.keys(storedState);
+
+            expect(keyList.includes("id")).toBeTruthy();
+            expect(keyList.includes("username")).toBeTruthy();
+            expect(keyList.includes("image")).toBeTruthy();
+        });
+
+        it("stores authorization header value in storage", async () => {
+            server.use(loginSuccess);
+            setup();
+            await fillAndSubmit();
+
+            const spinner = screen.queryByRole("status");
+            await waitForElementToBeRemoved(spinner);
+
+            const storedState = storage.getItem("auth");
+            expect(storedState.header).toBe("Bearer abcdefgh");
+        });
     });
 
     describe('Internationalization', () => {

@@ -4,6 +4,8 @@ import App from './App.svelte';
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 import Login from "./pages/Login/Login.svelte";
+import {resetAuthState} from "./store/stores";
+import storage from "./store/storage";
 
 const server = setupServer(
     rest.post(
@@ -137,9 +139,9 @@ describe('Routing', () => {
             await userEvent.click(loginButton);
         };
 
-        afterEach(() => {
-            localStorage.clear();
-        })
+        // afterEach(() => {
+        //     resetAuthState();
+        // })
 
         it('redirects to homepage after successful login', async () => {
            await fillLoginForm();
@@ -184,12 +186,13 @@ describe('Routing', () => {
             await fillLoginForm();
             await screen.findByTestId('home-page');
 
-            const state = JSON.parse(localStorage.getItem('auth'));
+            const state = storage.getItem('auth');
             expect(state.isLoggedIn).toBeTruthy();
         });
 
         it('displays layout of logged in state when local storage has logged in user', async () => {
-            localStorage.setItem('auth', JSON.stringify({ isLoggedIn: true, id: 5 }));
+            storage.setItem('auth', { isLoggedIn: true, id: 5 });
+            resetAuthState();
             await setup('/');
 
             await screen.findByTestId('home-page');

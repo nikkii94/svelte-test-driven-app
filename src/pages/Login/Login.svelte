@@ -29,7 +29,11 @@
             if (response.ok) {
                 loginSuccess = true;
                 const user = await response.json();
-                auth.set({ isLoggedIn: true, id: user.id });
+                $auth = {
+                    ...user,
+                    header: `Bearer ${user.token}`,
+                    isLoggedIn: true
+                }
                 navigate('/');
             } else {
                 const {message} = await response.json();
